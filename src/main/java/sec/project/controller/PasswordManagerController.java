@@ -35,7 +35,7 @@ public class PasswordManagerController {
     }
       
     @RequestMapping(value="/passwordmanager", params={"save"})
-    public String saveSeedstarter(final Password password, final BindingResult bindingResult, final ModelMap model) {
+    public String savePassword(final Password password, final BindingResult bindingResult, final ModelMap model) {
         if (bindingResult.hasErrors()) {
             return "passwordmanager";
         }

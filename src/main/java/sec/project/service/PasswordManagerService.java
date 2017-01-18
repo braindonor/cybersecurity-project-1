@@ -22,8 +22,8 @@ public class PasswordManagerService {
 		return this.passwordRepository.findAll();
     }
 
-    public void add(final Password seedStarter) {
-        this.passwordRepository.add(seedStarter);
+    public void add(final Password password) {
+        this.passwordRepository.add(password);
     }
     
 }
