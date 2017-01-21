@@ -2,26 +2,27 @@ package sec.project.entity;
 
 import java.util.Date;
 
-public class Password {
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-    private Integer id = null;
-    private Date dateCreated = null;
-    private String title = null;
-    private String url = null;
-    private String username = null;
-	private String password = null;
-    
-    public Password() {
-        super();
-    }
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
-    public Integer getId() {
-        return this.id;
-    }
+@Entity
+@Table(name = "PASSWORD")
+public class Password extends AbstractPersistable<Long> {
 
-    public void setId(final Integer id) {
-        this.id = id;
-    }
+    private Date dateCreated;
+    private String title;
+    private String url;
+    private String loginname;
+	private String userpassword;
+	
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     public Date getDateCreated() {
         return this.dateCreated;
@@ -48,27 +49,27 @@ public class Password {
 		this.url = url;
 	}
 	
-	public String getUsername() {
-		return username;
+	public String getLoginname() {
+		return loginname;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
+	public void setLoginname(String loginname) {
+		this.loginname = loginname;
 	}
 
-	public String getPassword() {
-		return password;
+	public String getUserpassword() {
+		return userpassword;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+	public void setUserpassword(String userpassword) {
+		this.userpassword = userpassword;
 	}
 
 	@Override
     public String toString() {
-        return "Password [id=" + this.id + ", dateCreated=" + this.dateCreated
-                + ", title=" + this.title + ", url=" + this.url + ", username="
-                + this.username + ", password=" + this.password + "]";
+        return "Password [dateCreated=" + this.dateCreated
+                + ", title=" + this.title + ", url=" + this.url + ", loginname="
+                + this.loginname + ", userpassword=" + this.userpassword + "]";
     }
     
 }

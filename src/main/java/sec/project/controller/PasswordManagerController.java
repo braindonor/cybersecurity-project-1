@@ -18,22 +18,18 @@ public class PasswordManagerController {
     
     @Autowired
     private PasswordManagerService passwordManagerService;
-       
-    public PasswordManagerController() {
-        super();
-    }
     
     @ModelAttribute("allPasswords")
     public List<Password> populatePasswords() {
         return this.passwordManagerService.findAll();
     }
        
-    @RequestMapping({"/","/passwordmanager"})
+    @RequestMapping({"*"})
     public String showPasswords(final Password password) {
         password.setDateCreated(Calendar.getInstance().getTime());
         return "passwordmanager";
     }
-      
+    
     @RequestMapping(value="/passwordmanager", params={"save"})
     public String savePassword(final Password password, final BindingResult bindingResult, final ModelMap model) {
         if (bindingResult.hasErrors()) {

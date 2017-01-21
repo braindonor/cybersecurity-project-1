@@ -13,17 +13,13 @@ public class PasswordManagerService {
     
     @Autowired
     private PasswordRepository passwordRepository; 
-      
-    public PasswordManagerService() {
-        super();
-    }
     
     public List<Password> findAll() {
 		return this.passwordRepository.findAll();
     }
 
     public void add(final Password password) {
-        this.passwordRepository.add(password);
+        this.passwordRepository.save(password);
     }
     
 }

@@ -13,6 +13,12 @@ body {
   width: 850px;
 }
 
+h1 {
+  font-weight: bold;
+  font-variant: small-caps;
+  text-align: center;
+}
+
 h2 {
   margin-top: 50px;
   margin-bottom: 30px;
@@ -82,9 +88,12 @@ form div.submit {
   border: 1px solid #000000;
 }
 
-form div.submit button {
-  font-weight: bold;
-  font-variant: small-caps;
+button {
+  float: center;
+}
+
+form.logoutbutton {
+  float: right;
 }
 
 div.passwordlist {
