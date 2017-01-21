@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -13,8 +14,11 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Entity
 @Table(name = "PASSWORD")
 public class Password extends AbstractPersistable<Long> {
-
-    private Date dateCreated;
+	
+    @ManyToOne
+	private User user;
+    
+	private Date dateCreated;
     private String title;
     private String url;
     private String loginname;
@@ -23,6 +27,14 @@ public class Password extends AbstractPersistable<Long> {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+	
+    public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
 
     public Date getDateCreated() {
         return this.dateCreated;
