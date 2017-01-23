@@ -7,7 +7,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import sec.project.domain.Account;
@@ -22,16 +24,27 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @PostConstruct
     public void init() {
-        // DO NOT CHANGE THESE VALUES!
+    	
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        
+        String password = encoder.encode("password1");
         Account account = new Account();
         account.setUsername("ted");
-        account.setPassword("$2a$10$nKOFU.4/iK9CqDIlBkmMm.WZxy2XKdUSlImsG8iKsAP57GMcXwLTS");
+        account.setPassword(password);
         accountRepository.save(account);
-        // ---
+
+        password = encoder.encode("password2");
         account = new Account();
         account.setUsername("jim");
-        account.setPassword("$2a$10$nKOFU.4/iK9CqDIlBkmMm.WZxy2XKdUSlImsG8iKsAP57GMcXwLTS");
+        account.setPassword(password);
         accountRepository.save(account);
+        
+        password = encoder.encode("password3");
+        account = new Account();
+        account.setUsername("bill");
+        account.setPassword(password);
+        accountRepository.save(account);
+        
     }
 
     @Override
