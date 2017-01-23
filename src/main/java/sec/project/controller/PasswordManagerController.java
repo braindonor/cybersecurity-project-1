@@ -1,14 +1,24 @@
 package sec.project.controller;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -22,70 +32,150 @@ import sec.project.service.PasswordManagerService;
 
 @Controller
 public class PasswordManagerController {
-    
-    @Autowired
-    private PasswordManagerService passwordManagerService;
-    
-    @Autowired
-    private UserRepository userRepository;
-  
-    @ModelAttribute("allPasswords")
-    public List<Password> populatePasswords() {
-    	
-    	List<Password> passwordList = null;
-    	
-    	String username = getUsername();
-    	User user = userRepository.findByUsername(username);
-    	if (user != null) {
-    		passwordList = user.getPasswords();
-    	}
-    	
-    	return passwordList;
-    }
-       
-    @RequestMapping({"*"})
-    public String showPasswords(final Password password) {
-        password.setDateCreated(Calendar.getInstance().getTime());
-        String username = getUsername();
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            user = new User();
-            user.setUsername(username);
-            user = userRepository.save(user);
-        }
-        
-        return "passwordmanager";
-    }
-    
-    @Transactional
-    @RequestMapping(value="/passwordmanager", params={"save"})
-    public String savePassword(final Password password, final BindingResult bindingResult, final ModelMap model) {
-        if (bindingResult.hasErrors()) {
-            return "passwordmanager";
-        }
-        
-        String username = getUsername();        
-        User user = userRepository.findByUsername(username);
-        user.setPassword(password);
-        user = userRepository.save(user);     
-        
-        passwordManagerService.add(password, user);
-        model.clear();
-        return "redirect:/passwordmanager";
-    }
-    
-    private String getUsername() {
-    	
-    	Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username;
-        
-        if (principal instanceof UserDetails) {
-          username = ((UserDetails)principal).getUsername();
-        } else {
-          username = principal.toString();
-        } 
-        
-        return username;
-    }
-     
+
+	@Autowired
+	private PasswordManagerService passwordManagerService;
+
+	@Autowired
+	private UserRepository userRepository;
+
+	@Autowired
+	private PasswordRepository passwordRepository;
+
+	@ModelAttribute("allPasswords")
+	public List<Password> populatePasswords() {
+
+		List<Password> passwordList = null;
+
+		String username = getUsername();
+		User user = userRepository.findByUsername(username);
+		if (user != null) {
+			passwordList = user.getPasswords();
+		}
+
+		return passwordList;
+	}
+
+	@ModelAttribute("searchPasswords")
+	public List<Password> populatePasswordsSearch() {
+
+		List<Password> passwordSearchList = new ArrayList<>();
+
+		String databaseAddress = "jdbc:h2:mem:testdb";
+		User user = userRepository.findByUsername(getUsername());
+
+		if (user != null) {
+
+			try {
+				Connection connection = DriverManager.getConnection(databaseAddress, "sa", "");
+				ResultSet resultSet = connection.createStatement().executeQuery(user.getSqlquery());
+
+				while (resultSet.next()) {
+					Long id = resultSet.getLong("id");
+					Password password = passwordRepository.getOne(id);
+					passwordSearchList.add(password);
+				}
+
+				// Close the connection
+				resultSet.close();
+				connection.close();
+				user.setSqlquery(null);
+				user = userRepository.save(user);
+
+			} catch (SQLException e) {
+				passwordSearchList = user.getPasswords();
+			}
+		}
+
+		return passwordSearchList;
+	}
+
+	@RequestMapping({ "*" })
+	public String showPasswords(final Password password) {
+		password.setDateCreated(Calendar.getInstance().getTime());
+		String username = getUsername();
+		User user = userRepository.findByUsername(username);
+		if (user == null) {
+			user = new User();
+			user.setUsername(username);
+			user.setSqlquery("");
+			user = userRepository.save(user);
+		}
+
+		return "passwordmanager";
+	}
+
+	@Transactional
+	@RequestMapping(value = "/passwordmanager", params = { "save" })
+	public String savePassword(final Password password, final BindingResult bindingResult, final ModelMap model) {
+		if (bindingResult.hasErrors()) {
+			return "passwordmanager";
+		}
+
+		String username = getUsername();
+		User user = userRepository.findByUsername(username);
+		user.setPassword(password);
+		user = userRepository.save(user);
+
+		passwordManagerService.add(password, user);
+		model.clear();
+
+		return "redirect:/passwordmanager";
+	}
+
+	@RequestMapping(value = "/passwordmanager", params = { "query" })
+	public String searchPassword(final Password password, final BindingResult bindingResult, final ModelMap model) {
+
+		if (bindingResult.hasErrors()) {
+			return "passwordmanager";
+		}
+
+		String username = getUsername();
+
+		String sql = "select password.id from password,user where password.user_id = user.id and user.username = '"
+				+ username + "'";
+		
+		if (password.getDateCreated() != null) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+			sql = sql + " and password.date_created = '" + dateFormat.format(password.getDateCreated()) + "'";
+		}
+
+		if (password.getTitle().length() > 0) {
+			sql = sql + " and password.title = '" + password.getTitle() + "'";
+		}
+		
+		if (password.getLoginname().length() > 0) {
+			sql = sql + " and password.loginname = '" + password.getLoginname() + "'";
+		}
+		
+		if (password.getUrl().length() > 0) {
+			sql = sql + " and password.url = '" + password.getUrl() + "'";
+		}
+		
+		if (password.getUserpassword().length() > 0) {
+			sql = sql + " and password.userpassword = '" + password.getUserpassword() + "'";
+		}
+
+		User user = userRepository.findByUsername(username);
+		user.setSqlquery(sql);
+		user = userRepository.save(user);
+
+		return "redirect:/passwordmanager";
+	}
+
+	private String getUsername() {
+
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username;
+
+		if (principal instanceof UserDetails) {
+			username = ((UserDetails) principal).getUsername();
+		} else {
+			username = principal.toString();
+		}
+
+		return username;
+	}
+
 }

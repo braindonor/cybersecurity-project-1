@@ -10,3 +10,4 @@ public interface PasswordRepository extends JpaRepository<Password, Long>{
 	Password findByLoginname(String loginname);
 
 }
+

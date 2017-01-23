@@ -18,6 +18,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 public class User extends AbstractPersistable<Long> {
 
     private String username;
+    private String sqlquery;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,5 +47,13 @@ public class User extends AbstractPersistable<Long> {
     public List<Password> getPasswords() {
         return passwords;
     }
+
+	public String getSqlquery() {
+		return sqlquery;
+	}
+
+	public void setSqlquery(String sqlquery) {
+		this.sqlquery = sqlquery;
+	}
     
 }
