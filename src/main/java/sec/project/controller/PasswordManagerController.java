@@ -94,13 +94,7 @@ public class PasswordManagerController {
 	public String showPasswords(final Password password) {
 		password.setDateCreated(Calendar.getInstance().getTime());
 		String username = getUsername();
-		User user = userRepository.findByUsername(username);
-		if (user == null) {
-			user = new User();
-			user.setUsername(username);
-			user.setSqlquery("");
-			user = userRepository.save(user);
-		}
+
 
 		return "passwordmanager";
 	}
@@ -173,6 +167,14 @@ public class PasswordManagerController {
 			username = ((UserDetails) principal).getUsername();
 		} else {
 			username = principal.toString();
+		}
+		
+		User user = userRepository.findByUsername(username);
+		if (user == null) {
+			user = new User();
+			user.setUsername(username);
+			user.setSqlquery("");
+			user = userRepository.save(user);
 		}
 
 		return username;
