@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
 @Configuration
@@ -27,11 +28,16 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 		http.authorizeRequests().antMatchers("/h2-console/*").permitAll().anyRequest().authenticated();
 
-		http.authorizeRequests().anyRequest().authenticated().and().formLogin().loginProcessingUrl("/login")
-				.successHandler(new CustomUrlAuthenticationSuccessHandler())
-				.failureHandler(new SimpleUrlAuthenticationFailureHandler()).and().httpBasic();
-
-		http.formLogin().permitAll();
+		/*http.authorizeRequests().anyRequest().authenticated().and().formLogin().loginProcessingUrl("/login")
+		         .successHandler(new CustomUrlAuthenticationSuccessHandler())
+				.failureHandler(new CustomUrlAuthenticationFailureHandler());
+		*/
+		
+		http.authorizeRequests().anyRequest().authenticated().and().formLogin()
+        .successHandler(new CustomUrlAuthenticationSuccessHandler())
+		.failureHandler(new CustomUrlAuthenticationFailureHandler());
+			
+		//http.formLogin().permitAll();
 
 	}
 
@@ -44,4 +50,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
+  
+	
+
 }
