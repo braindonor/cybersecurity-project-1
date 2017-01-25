@@ -10,34 +10,38 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private UserDetailsService userDetailsService;
+	@Autowired
+	private UserDetailsService userDetailsService;
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        // you can access the h2-console through /h2-console
-        http.csrf().disable();
-        http.headers().frameOptions().sameOrigin();
-        
-        http.authorizeRequests()
-                .antMatchers("/h2-console/*").permitAll()
-                .anyRequest().authenticated();
-        http.formLogin()
-                .permitAll();
-    }
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		// you can access the h2-console through /h2-console
+		http.csrf().disable();
+		http.headers().frameOptions().sameOrigin();
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-    }
+		http.authorizeRequests().antMatchers("/h2-console/*").permitAll().anyRequest().authenticated();
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+		http.authorizeRequests().anyRequest().authenticated().and().formLogin().loginProcessingUrl("/login")
+				.successHandler(new CustomUrlAuthenticationSuccessHandler())
+				.failureHandler(new SimpleUrlAuthenticationFailureHandler()).and().httpBasic();
+
+		http.formLogin().permitAll();
+
+	}
+
+	@Autowired
+	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+		auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }
