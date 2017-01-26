@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import sec.project.entity.Password;
 import sec.project.entity.User;
 import sec.project.repository.PasswordRepository;
-import sec.project.repository.UserRepository;
 
 @Service
 public class PasswordManagerService {
