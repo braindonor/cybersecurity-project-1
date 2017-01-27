@@ -37,7 +37,7 @@ public class User extends AbstractPersistable<Long> {
 	}
 
 	public void setUsername(String username) {
-		this.username = username;
+		if (username.length() <= 255) this.username = username;
 	}
 	
 	public void setPassword(Password password) {
@@ -53,7 +53,7 @@ public class User extends AbstractPersistable<Long> {
 	}
 
 	public void setSqlquery(String sqlquery) {
-		this.sqlquery = sqlquery;
+		if (sqlquery.length() <= 255) this.sqlquery = sqlquery;
 	}
     
 }

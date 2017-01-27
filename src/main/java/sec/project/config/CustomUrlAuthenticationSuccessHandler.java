@@ -15,7 +15,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 
 public class CustomUrlAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-	public final Integer SESSION_TIMEOUT_IN_SECONDS = 30;
+	public final Integer SESSION_TIMEOUT_IN_SECONDS = 0;
 
 	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 

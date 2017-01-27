@@ -50,7 +50,7 @@ public class Password extends AbstractPersistable<Long> {
 	}
 
 	public void setTitle(String title) {
-		this.title = title;
+		if (title.length() <= 255) this.title = title;
 	}
 
 	public String getUrl() {
@@ -58,7 +58,7 @@ public class Password extends AbstractPersistable<Long> {
 	}
 
 	public void setUrl(String url) {
-		this.url = url;
+		if (url.length() <= 255) this.url = url;
 	}
 	
 	public String getLoginname() {
@@ -66,7 +66,7 @@ public class Password extends AbstractPersistable<Long> {
 	}
 
 	public void setLoginname(String loginname) {
-		this.loginname = loginname;
+		if (loginname.length() <= 255) this.loginname = loginname;
 	}
 
 	public String getUserpassword() {
@@ -74,7 +74,7 @@ public class Password extends AbstractPersistable<Long> {
 	}
 
 	public void setUserpassword(String userpassword) {
-		this.userpassword = userpassword;
+		if (userpassword.length() <= 255) this.userpassword = userpassword;
 	}
 
 	@Override

@@ -123,24 +123,27 @@ public class PasswordManagerController {
 			sql = sql + " and password.date_created = '" + dateFormat.format(password.getDateCreated()) + "'";
 		}
 
-		if (password.getTitle().length() > 0) {
+		if (password.getTitle() != null && password.getTitle().length() > 0) {
 			sql = sql + " and password.title = '" + password.getTitle() + "'";
 		}
 
-		if (password.getLoginname().length() > 0) {
+		if (password.getLoginname() != null && password.getLoginname().length() > 0) {
 			sql = sql + " and password.loginname = '" + password.getLoginname() + "'";
 		}
 
-		if (password.getUrl().length() > 0) {
+		if (password.getUrl() != null && password.getUrl().length() > 0) {
 			sql = sql + " and password.url = '" + password.getUrl() + "'";
 		}
 
-		if (password.getUserpassword().length() > 0) {
+		if (password.getUserpassword() != null && password.getUserpassword().length() > 0) {
 			sql = sql + " and password.userpassword = '" + password.getUserpassword() + "'";
 		}
 
 		User user = userRepository.findByUsername(username);
+		
+
 		user.setSqlquery(sql);
+		
 		user = userRepository.save(user);
 
 		return "redirect:/passwordmanager";
