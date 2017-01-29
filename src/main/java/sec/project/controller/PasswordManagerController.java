@@ -2,8 +2,8 @@ package sec.project.controller;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -38,47 +38,15 @@ public class PasswordManagerController {
 	@Autowired
 	private PasswordRepository passwordRepository;
 
-	
+	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	String databaseAddress = "jdbc:h2:mem:testdb";
 
 	@ModelAttribute("searchPasswords")
 	public List<Password> populatePasswordsSearch() {
 
-		List<Password> passwordSearchList = new ArrayList<>();
+		return executeSqlSearchQuery(); // For standard sql query uncomment this line
+		//return executeSqlSearchQueryPrepared(); //For prepeared sql query uncomment this line
 
-		String databaseAddress = "jdbc:h2:mem:testdb";
-		String loggedInUser = getUsername();
-
-		User user = userRepository.findByUsername(loggedInUser);
-
-		String sqlQuery = user.getSqlquery();
-
-		if (sqlQuery.equals("")) {
-			sqlQuery = "select password.id from password,user where password.user_id = user.id and user.username = '"
-					+ loggedInUser + "'";
-	
-		} else {
-			sqlQuery = user.getSqlquery();
-		}
-
-		try {
-			Connection connection = DriverManager.getConnection(databaseAddress, "sa", "");
-			ResultSet resultSet = connection.createStatement().executeQuery(sqlQuery);
-
-			while (resultSet.next()) {
-				Long id = resultSet.getLong("id");
-				Password password = passwordRepository.getOne(id);
-				passwordSearchList.add(password);
-			}
-
-			// Close the connection
-			resultSet.close();
-			connection.close();
-			user.setSqlquery("");
-			user = userRepository.save(user);
-
-		} catch (SQLException e) {}
-
-		return passwordSearchList;
 	}
 
 	@RequestMapping({ "*" })
@@ -113,37 +81,15 @@ public class PasswordManagerController {
 		}
 
 		String username = getUsername();
-
-		String sql = "select password.id from password,user where password.user_id = user.id and user.username = '"
-				+ username + "'";
-
-		if (password.getDateCreated() != null) {
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-			sql = sql + " and password.date_created = '" + dateFormat.format(password.getDateCreated()) + "'";
-		}
-
-		if (password.getTitle() != null && password.getTitle().length() > 0) {
-			sql = sql + " and password.title = '" + password.getTitle() + "'";
-		}
-
-		if (password.getLoginname() != null && password.getLoginname().length() > 0) {
-			sql = sql + " and password.loginname = '" + password.getLoginname() + "'";
-		}
-
-		if (password.getUrl() != null && password.getUrl().length() > 0) {
-			sql = sql + " and password.url = '" + password.getUrl() + "'";
-		}
-
-		if (password.getUserpassword() != null && password.getUserpassword().length() > 0) {
-			sql = sql + " and password.userpassword = '" + password.getUserpassword() + "'";
-		}
-
 		User user = userRepository.findByUsername(username);
-		
 
-		user.setSqlquery(sql);
-		
+		user.setSqlquery("query");
+		user.setFormDateCreated(password.getDateCreated());
+		user.setFormLoginname(password.getLoginname());
+		user.setFormPassword(password.getUserpassword());
+		user.setFormTitle(password.getTitle());
+		user.setFormUrl(password.getUrl());
+
 		user = userRepository.save(user);
 
 		return "redirect:/passwordmanager";
@@ -163,4 +109,155 @@ public class PasswordManagerController {
 		return username;
 	}
 
+	private List<Password> executeSqlSearchQuery() {
+
+		List<Password> passwordSearchList = new ArrayList<>();
+
+		String loggedInUser = getUsername();
+
+		User user = userRepository.findByUsername(loggedInUser);
+
+		String sqlQuery = user.getSqlquery();
+		String sql = "select password.id from password,user where password.user_id = user.id and user.username = '"
+				+ loggedInUser + "'";
+
+		if (sqlQuery.equals("query")) {
+
+			if (user.getFormDateCreated() != null) {
+				sql = sql + " and password.date_created = '" + dateFormat.format(user.getFormDateCreated()) + "'";
+			}
+
+			if (user.getFormTitle() != null && user.getFormTitle().length() > 0) {
+				sql = sql + " and password.title = '" + user.getFormTitle() + "'";
+			}
+
+			if (user.getFormLoginname() != null && user.getFormLoginname().length() > 0) {
+				sql = sql + " and password.loginname = '" + user.getFormLoginname() + "'";
+			}
+
+			if (user.getFormUrl() != null && user.getFormUrl().length() > 0) {
+				sql = sql + " and password.url = '" + user.getFormUrl() + "'";
+			}
+
+			if (user.getFormPassword() != null && user.getFormPassword().length() > 0) {
+				sql = sql + " and password.userpassword = '" + user.getFormPassword() + "'";
+			}
+		}
+
+		try {
+			Connection connection = DriverManager.getConnection(databaseAddress, "sa", "");
+			ResultSet resultSet = connection.createStatement().executeQuery(sql);
+
+			while (resultSet.next()) {
+				Long id = resultSet.getLong("id");
+				Password password = passwordRepository.getOne(id);
+				passwordSearchList.add(password);
+			}
+
+			resultSet.close();
+			connection.close();
+			user.setSqlquery("");
+			user = userRepository.save(user);
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+
+		return passwordSearchList;
+	}
+
+	private List<Password> executeSqlSearchQueryPrepared() {
+
+		List<Password> passwordSearchList = new ArrayList<>();
+
+		try {
+
+			Connection connection = DriverManager.getConnection(databaseAddress, "sa", "");
+			PreparedStatement ps;
+			String loggedInUser = getUsername();
+
+			User user = userRepository.findByUsername(loggedInUser);
+
+			String sqlQuery = user.getSqlquery();
+			String sql = "select password.id from password,user where password.user_id = user.id and user.username = ?";
+
+			if (sqlQuery.equals("query")) {
+				
+				if (user.getFormDateCreated() != null) {
+					sql = sql + " and password.date_created = ?";
+				}
+
+				if (user.getFormTitle() != null && user.getFormTitle().length() > 0) {
+					sql = sql + " and password.title = ?";
+				}
+
+				if (user.getFormLoginname() != null && user.getFormLoginname().length() > 0) {
+					sql = sql + " and password.loginname = ?";
+				}
+
+				if (user.getFormUrl() != null && user.getFormUrl().length() > 0) {
+					sql = sql + " and password.url = ?";
+				}
+
+				if (user.getFormPassword() != null && user.getFormPassword().length() > 0) {
+					sql = sql + " and password.userpassword = ?";
+				}
+
+				ps = connection.prepareStatement(sql);
+
+				int pos = 1;
+				ps.setString(pos++, loggedInUser);
+
+				if (user.getFormDateCreated() != null) {
+					ps.setDate(pos++, java.sql.Date.valueOf(dateFormat.format(user.getFormDateCreated())));
+				}
+
+				if (user.getFormTitle() != null && user.getFormTitle().length() > 0) {
+					ps.setString(pos++, user.getFormTitle());
+				}
+
+				if (user.getFormLoginname() != null && user.getFormLoginname().length() > 0) {
+					ps.setString(pos++, user.getFormLoginname());
+				}
+
+				if (user.getFormUrl() != null && user.getFormUrl().length() > 0) {
+					ps.setString(pos++, user.getFormUrl());
+				}
+
+				if (user.getFormPassword() != null && user.getFormPassword().length() > 0) {
+					ps.setString(pos++, user.getFormPassword());
+				}
+
+			} else {
+
+				ps = connection.prepareStatement(sql);
+				ps.setString(1, loggedInUser);
+
+			}
+
+			try {
+
+				ResultSet resultSet = ps.executeQuery();
+
+				while (resultSet.next()) {
+					Long id = resultSet.getLong("id");
+					Password password = passwordRepository.getOne(id);
+					passwordSearchList.add(password);
+				}
+
+				resultSet.close();
+				connection.close();
+				user.setSqlquery("");
+				user = userRepository.save(user);
+
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+
+		return passwordSearchList;
+	}
 }

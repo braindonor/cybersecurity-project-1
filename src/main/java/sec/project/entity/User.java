@@ -19,6 +19,11 @@ public class User extends AbstractPersistable<Long> {
 
     private String username;
     private String sqlquery;
+    private Date formDateCreated;
+    private String formTitle;
+    private String formUrl;
+    private String formLoginname;
+	private String formPassword;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,6 +59,46 @@ public class User extends AbstractPersistable<Long> {
 
 	public void setSqlquery(String sqlquery) {
 		if (sqlquery.length() <= 255) this.sqlquery = sqlquery;
+	}
+
+	public Date getFormDateCreated() {
+		return formDateCreated;
+	}
+
+	public void setFormDateCreated(Date formDateCreated) {
+		this.formDateCreated = formDateCreated;
+	}
+
+	public String getFormTitle() {
+		return formTitle;
+	}
+
+	public void setFormTitle(String formTitle) {
+		this.formTitle = formTitle;
+	}
+
+	public String getFormUrl() {
+		return formUrl;
+	}
+
+	public void setFormUrl(String formUrl) {
+		this.formUrl = formUrl;
+	}
+
+	public String getFormLoginname() {
+		return formLoginname;
+	}
+
+	public void setFormLoginname(String formLoginname) {
+		this.formLoginname = formLoginname;
+	}
+
+	public String getFormPassword() {
+		return formPassword;
+	}
+
+	public void setFormPassword(String formPassword) {
+		this.formPassword = formPassword;
 	}
     
 }
