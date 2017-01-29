@@ -45,7 +45,7 @@ public class PasswordManagerController {
 	public List<Password> populatePasswordsSearch() {
 
 		return executeSqlSearchQuery(); // For standard sql query uncomment this line
-		//return executeSqlSearchQueryPrepared(); //For prepeared sql query uncomment this line
+		//return executeSqlSearchQueryPrepared(); //For prepared sql query uncomment this line
 
 	}
 
